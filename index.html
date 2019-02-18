@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+	<meta charset="UTF-8">
+	<title>waterfall-sinanews</title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box; 
+		}
+		.waterfall-news{
+			max-width: 1200px;
+			margin: 15px auto; 
+			position: relative;
+		}
+		figure{
+			margin: 20px; 
+			width: calc(33.33% - 100px);
+			padding: 10px 10px 20px 10px;
+			background-color: #fff;
+			border: 1px solid #999; 
+			position:absolute;
+		}
+		.waterfall-news:after{
+			content:'';
+			display: block;
+			clear: both;
+		}
+		img{
+			width: 280px;
+		}
+		figcaption{
+			padding: 10px 0 5px 0;
+			border-bottom: 1px solid #999;
+			font-size: 16px;
+			font-weight: bold;
+		}
+	</style>
+</head>
+<body>
+	<div class="waterfall-news">
+<!-- 		<figure class='item'>
+			<img src="http://n.sinaimg.cn/tech/transform/200/w600h400/20190123/wHpH-hryfqhm0114532.jpg" alt="">
+			<figcaption>美！日本湖面现"冰冻气泡"</figcaption>
+		</figure> -->
+		<figure class="item hide"></figure>
+	</div>
+	<div class="name">能看到我么</div>
+	<script>
+		var curPage = 1
+		var perPageCount = 10
+		var colSumHeight = []
+		var num=0
+
+		function getData(callback){
+			$.ajax(
+				{
+					url: 'http://platform.sina.com.cn/slide/album_tech',
+					type:'get',
+					dataType: 'jsonp',
+					jsonp: 'jsoncallback',
+					data: {
+						app_key:'1271687855',
+						format:'json',
+						size: 'img',
+						num: perPageCount,
+						page:curPage
+					},
+					success: function(ret){
+						if(ret.status.code ==0){
+							setdata(ret)
+						}
+					}
+				
+				}
+			)
+			curPage++;
+		}
+		getData()
+		function setdata(data){
+			
+			console.log('游戏开始了')
+			data.data.forEach(function(story){
+				var basicstring = "<figure class='item'>" +
+					'<img src="http://n.sinaimg.cn/tech/transform/200/w600h400/20190123/wHpH-hryfqhm0114532.jpg" alt="">'+
+					'<figcaption>美！日本湖面现"冰冻气泡"</figcaption>'+'</figure>'
+				var $node= $(basicstring)
+				console.log("ddd")
+				$node.find('img').attr('src',story.img_url)
+				$node.find('figcaption').text(story.short_name)
+				$('.waterfall-news').append($node)
+				$('img').eq(num).on('load',function(){
+					console.log('图片加载完毕')
+					console.log(num)
+					num+=1
+					waterFallPlace($node)})
+			})		
+					
+		}
+		function isshow($node){
+			return $node.offset().top <= $(window).height() +$(window).scrollTop()
+		}
+		function loadimg($img){
+			getData()
+		}
+		$(window).on('scroll',function(){
+				if(isshow($('.name'))){
+					loadimg()
+				}
+			})
+		var nodeWidth = $('.item').outerWidth(true),
+		colNum = parseInt($('.waterfall-news').width()/nodeWidth);
+		for(var i=0; i<colNum; i++){
+			colSumHeight.push(0)
+		}
+		function waterFallPlace($node){
+			// $nodes.each(function(){
+				var $cur = $node;
+				//colSumHeight = [100, 250, 80, 200]
+				var idx = 0,
+					  minSumHeight = colSumHeight[0];
+				for(var i=0;i<colSumHeight.length; i++){
+					if(colSumHeight[i] < minSumHeight){
+						idx = i;
+						minSumHeight = colSumHeight[i];
+					}
+				}
+				$cur.css({
+					left: nodeWidth*idx,
+					top: minSumHeight,
+					opacity: 1
+				});
+				console.log($cur.outerHeight(true))
+				if($cur.outerHeight(true)<299){
+					var trueheight = 300
+				}else{ trueheight = 300}
+				console.log(minSumHeight)
+				console.log(colSumHeight)
+				colSumHeight[idx] = trueheight + colSumHeight[idx];
+				$('.waterfall-news').height(Math.max.apply(null,colSumHeight));
+			// });
+		}
+	</script>
+</body>
+</html>
