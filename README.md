@@ -1,6 +1,6 @@
 # waterfall-sinanews
 ## 标题:瀑布流新闻站
-预览地址
+预览地址 https://xiaoweimei.github.io/waterfall-sinanews/
 ## 懒加载原理
 1. 当页面加载时,检查该元素是否出现在视野中
 2. 假如到达视野，就通过修改img标签下的src属性值使图片加载
